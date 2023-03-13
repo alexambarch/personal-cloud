@@ -4,7 +4,12 @@ variable "hetzner_token" {
   sensitive   = true
 }
 
-variable "terraform_organization" {
+variable "cloudinit_server" {
   type        = string
-  description = "The name of your Terraform Cloud organization"
+  description = "The path of the cloudinit yaml for the server instances"
+}
+
+variable "cloudinit_client" {
+  type        = string
+  description = "The path of the cloudinit yaml for the client instances"
 }

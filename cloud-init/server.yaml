@@ -1,6 +1,16 @@
 #cloud-config
+groups:
+  - docker: [root]
+
+users:
+  - name: cloud-admin
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: docker, admin
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyETMQTYrLHGzIza/aOqRvjGJ+mqSKf26gDKjCpg+OoBd5tfWQqAkCLeD1CRFyxplS9gaYiVhpffj4SdA0kus9D4Y1Zs6o+Dn6m2nAVdhjovLJfezAlaHkl5CBqM3UYqZ+SDmBV4unSE2wFpnwQPedq5+Wv915iMK6UMS/ID0tcCsqxlgcdgt2d1eipqNfDnoyfLikmoT7/0yU9TBUe5bBLRD14pukcIe2VaLldrqN0R4wN/0n0ZTF6BxhPlApYlGpOm6lb9tkOX5T5qLfRDXIHhU5/Q7yVbuo2GwYJu1DKKhWQTng/JwT9qxwryuAhfSXel0Pf8nwfGnp6IfzkXL8GhwioYaBgz8iFSpPUEgZL8NIBbv0VFj2ODV5WZmsoK1ci7yy05fHq8KdhCIOndmHvpE+1VeE+JcOn3hjF/hDhL5lnyq4iImoiefgDVxRbXpMVSiB3OvIJHyMjtW54mqPz8TwCl7G89vQk89B+mmcVfiCDNmOaFMn78YGPcsqCns=
 
 package_update: true
 package_upgrade: true
-ssh_authorized_keys:
-  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyETMQTYrLHGzIza/aOqRvjGJ+mqSKf26gDKjCpg+OoBd5tfWQqAkCLeD1CRFyxplS9gaYiVhpffj4SdA0kus9D4Y1Zs6o+Dn6m2nAVdhjovLJfezAlaHkl5CBqM3UYqZ+SDmBV4unSE2wFpnwQPedq5+Wv915iMK6UMS/ID0tcCsqxlgcdgt2d1eipqNfDnoyfLikmoT7/0yU9TBUe5bBLRD14pukcIe2VaLldrqN0R4wN/0n0ZTF6BxhPlApYlGpOm6lb9tkOX5T5qLfRDXIHhU5/Q7yVbuo2GwYJu1DKKhWQTng/JwT9qxwryuAhfSXel0Pf8nwfGnp6IfzkXL8GhwioYaBgz8iFSpPUEgZL8NIBbv0VFj2ODV5WZmsoK1ci7yy05fHq8KdhCIOndmHvpE+1VeE+JcOn3hjF/hDhL5lnyq4iImoiefgDVxRbXpMVSiB3OvIJHyMjtW54mqPz8TwCl7G89vQk89B+mmcVfiCDNmOaFMn78YGPcsqCns=
+
+packages:
+  - make

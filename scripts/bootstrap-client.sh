@@ -18,4 +18,4 @@ _install_nomad () {
 }
 
 BIND_ADDRESS_TEMPLATE='{{ GetPrivateInterfaces | join "address" " " }}'
-consul agent -server -bind $BIND_ADDRESS_TEMPLATE -client $BIND_ADDRESS_TEMPLATE -bootstrap-expect 1 -config-file=/home/cloud-admin/consul-server.json
+consul agent -bind $BIND_ADDRESS_TEMPLATE -client $BIND_ADDRESS_TEMPLATE -bootstrap-expect 1 -config-file /home/cloud-admin/consul-client.json
