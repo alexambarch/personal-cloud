@@ -96,7 +96,7 @@ resource "hcloud_server" "server" {
   image       = "ubuntu-22.04"
   server_type = "cpx11"
   location    = "ash"
-  user_data   = file(var.cloudinit_server)
+  user_data   = file(pathexpand(var.cloudinit_server))
 
   public_net {
     ipv4_enabled = true
@@ -137,7 +137,7 @@ resource "hcloud_server" "client" {
   server_type        = "cpx11"
   location           = "ash"
   placement_group_id = hcloud_placement_group.placement-group.id
-  user_data          = file(var.cloudinit_client)
+  user_data          = file(pathexpand(var.cloudinit_client))
 
   public_net {
     ipv4_enabled = true

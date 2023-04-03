@@ -13,4 +13,36 @@ package_update: true
 package_upgrade: true
 
 packages:
-  - make
+  - wget
+  - unzip
+
+runcmd:
+  # Install consul and nomad
+  - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+  - apt update && apt install -y consul nomad
+  - systemctl enable consul
+  - systemctl start consul
+  - systemctl enable nomad
+  - systemctl start nomad
+
+write_files:
+  - encoding: b64
+    content: |
+      ewogICJkYXRhY2VudGVyIjogImRjMSIsCiAgImRhdGFfZGlyIjogIi9vcHQvY29uc3VsIiwKICAi
+      bG9nX2xldmVsIjogIklORk8iLAogICJzZXJ2ZXIiOiB0cnVlLAogICJib290c3RyYXBfZXhwZWN0
+      IjogMSwKICAidWkiOiB0cnVlLAogICJjbGllbnRfYWRkciI6ICJ7eyBHZXRQcml2YXRlSVAgfX0i
+      LAogICJiaW5kX2FkZHIiOiAie3sgR2V0UHJpdmF0ZUlQIH19IiwKICAicG9ydHMiOiB7CiAgICAi
+      aHR0cCI6IDg1MDAsCiAgICAiaHR0cHMiOiAtMQogIH0sCiAgImVuYWJsZV9zY3JpcHRfY2hlY2tz
+      IjogdHJ1ZQp9Cg==
+    owner: cloud-admin
+    path: /etc/consul.d/server_config.json
+    permissions: '0755'
+  - encoding: b64
+    content: |
+      ewogICAgImRhdGFfZGlyIjogIi9vcHQvbm9tYWQvZGF0YSIsCiAgICAic2VydmVyIjogewogICAg
+      ICAgICJlbmFibGVkIjogdHJ1ZSwKICAgICAgICAiYm9vdHN0cmFwX2V4cGVjdCI6IDEKICAgIH0K
+      fQo=
+    owner: cloud-admin
+    path: /etc/nomad.d/server_config.json
+    permissions: '0755'
