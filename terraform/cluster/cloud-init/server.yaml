@@ -27,22 +27,33 @@ runcmd:
   - systemctl start nomad
 
 write_files:
-  - encoding: b64
-    content: |
-      ewogICJkYXRhY2VudGVyIjogImRjMSIsCiAgImRhdGFfZGlyIjogIi9vcHQvY29uc3VsIiwKICAi
-      bG9nX2xldmVsIjogIklORk8iLAogICJzZXJ2ZXIiOiB0cnVlLAogICJib290c3RyYXBfZXhwZWN0
-      IjogMSwKICAidWkiOiB0cnVlLAogICJjbGllbnRfYWRkciI6ICJ7eyBHZXRQcml2YXRlSVAgfX0i
-      LAogICJiaW5kX2FkZHIiOiAie3sgR2V0UHJpdmF0ZUlQIH19IiwKICAicG9ydHMiOiB7CiAgICAi
-      aHR0cCI6IDg1MDAsCiAgICAiaHR0cHMiOiAtMQogIH0sCiAgImVuYWJsZV9zY3JpcHRfY2hlY2tz
-      IjogdHJ1ZQp9Cg==
+  - content: |
+      {
+        "datacenter": "dc1",
+        "data_dir": "/opt/consul",
+        "log_level": "INFO",
+        "server": true,
+        "bootstrap_expect": 1,
+        "ui": true,
+        "client_addr": "{{ GetPrivateIP }}",
+        "bind_addr": "{{ GetPrivateIP }}",
+        "ports": {
+          "http": 8500,
+          "https": -1
+        },
+        "enable_script_checks": true
+      }
     owner: cloud-admin
     path: /etc/consul.d/server_config.json
     permissions: '0755'
-  - encoding: b64
-    content: |
-      ewogICAgImRhdGFfZGlyIjogIi9vcHQvbm9tYWQvZGF0YSIsCiAgICAic2VydmVyIjogewogICAg
-      ICAgICJlbmFibGVkIjogdHJ1ZSwKICAgICAgICAiYm9vdHN0cmFwX2V4cGVjdCI6IDEKICAgIH0K
-      fQo=
+  - content: |
+      {
+        "data_dir": "/opt/nomad/data",
+        "server": {
+          "enabled": true,
+          "bootstrap_expect": 1
+        }
+      }
     owner: cloud-admin
     path: /etc/nomad.d/server_config.json
     permissions: '0755'

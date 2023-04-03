@@ -13,3 +13,8 @@ variable "cloudinit_client" {
   type        = string
   description = "The path of the cloudinit yaml for the client instances"
 }
+
+variable "allowlist" {
+  type        = list(number)
+  description = "A list of IP ranges to allow access to the consul and nomad web UIs"
+}

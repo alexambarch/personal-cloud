@@ -41,6 +41,7 @@ resource "hcloud_network" "network" {
 }
 
 resource "hcloud_firewall" "firewall" {
+  name = "Cluster Firewall"
   rule {
     direction  = "in"
     protocol   = "icmp"
@@ -71,6 +72,20 @@ resource "hcloud_firewall" "firewall" {
   rule {
     direction  = "in"
     protocol   = "tcp"
+    port       = "8500"
+    source_ips = var.allowlist
+  }
+
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "4646"
+    source_ips = var.allowlist
+  }
+
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
     port       = "0-65535"
     source_ips = local.private_network
   }
@@ -96,7 +111,7 @@ resource "hcloud_server" "server" {
   image       = "ubuntu-22.04"
   server_type = "cpx11"
   location    = "ash"
-  user_data   = file(pathexpand(var.cloudinit_server))
+  user_data   = file("${path.module}/cloud-init/${var.cloudinit_server}")
 
   public_net {
     ipv4_enabled = true
@@ -137,12 +152,12 @@ resource "hcloud_server" "client" {
   server_type        = "cpx11"
   location           = "ash"
   placement_group_id = hcloud_placement_group.placement-group.id
-  user_data          = file(pathexpand(var.cloudinit_client))
+  user_data          = file("${path.module}/cloud-init/${var.cloudinit_client}")
 
   public_net {
     ipv4_enabled = true
     ipv6_enabled = true
-    ipv4         = hcloud_primary_ip.client_ip[count.index]
+    ipv4         = hcloud_primary_ip.client_ip[count.index].id
   }
 
   network {

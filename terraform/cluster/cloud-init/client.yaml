@@ -27,24 +27,36 @@ runcmd:
   - systemctl start nomad
 
 write_files:
-  - encoding: b64
-    content: |
-      ewogICJkYXRhY2VudGVyIjogImRjMSIsCiAgImRhdGFfZGlyIjogIi9vcHQvY29uc3VsIiwKICAi
-      bG9nX2xldmVsIjogIklORk8iLAogICJzZXJ2ZXIiOiBmYWxzZSwKICAiY2xpZW50X2FkZHIiOiAi
-      e3sgR2V0UHJpdmF0ZUlQIH19IiwKICAiYmluZF9hZGRyIjogInt7IEdldFByaXZhdGVJUCB9fSIs
-      CiAgInJldHJ5X2pvaW4iOiBbIjEwLjAuMS4xIl0sCiAgInBvcnRzIjogewogICAgImh0dHAiOiA4
-      NTAwLAogICAgImh0dHBzIjogLTEKICB9LAogICJlbmFibGVfc2NyaXB0X2NoZWNrcyI6IHRydWUK
-      fQo=
+  - content: |
+      {
+        "datacenter": "dc1",
+        "data_dir": "/opt/consul",
+        "log_level": "INFO",
+        "server": false,
+        "client_addr": "{{ GetPrivateIP }}",
+        "bind_addr": "{{ GetPrivateIP }}",
+        "retry_join": ["10.0.1.1"],
+        "ports": {
+          "http": 8500,
+          "https": -1
+        },
+        "enable_script_checks": true
+      }
     owner: cloud-admin:cloud-admin
     path: /etc/consul.d/client_config.json
     permissions: '0755'
-  - encoding: b64
-    content: |
-      ewogICAgImRhdGFfZGlyIjogIi9vcHQvbm9tYWQvZGF0YSIsCiAgICAiYmluZF9hZGRyIjogInt7
-      IEdldFByaXZhdGVJUCB9fSIsCiAgICAiY2xpZW50IjogewogICAgICAgICJlbmFibGVkIjogdHJ1
-      ZSwKICAgICAgICAib3B0aW9ucyI6IHsKICAgICAgICAgICAgImRyaXZlci5yYXdfZXhlYy5lbmFi
-      bGUiOiAxLAogICAgICAgICAgICAiZG9ja2VyLnByaXZpbGVnZWQuZW5hYmxlZCI6IHRydWUKICAg
-      ICAgICB9CiAgICB9Cn0K
+  - content: |
+      {
+        "data_dir": "/opt/nomad/data",
+        "bind_addr": "{{ GetPrivateIP }}",
+        "client": {
+          "enabled": true,
+          "options": {
+            "driver.raw_exec.enable": 1,
+            "docker.privileged.enabled": true
+          }
+        }
+      }
     owner: cloud-admin:cloud-admin
     path: /etc/nomad.d/client_config.json
     permissions: '0755'
