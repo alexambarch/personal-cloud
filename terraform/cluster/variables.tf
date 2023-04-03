@@ -15,6 +15,6 @@ variable "cloudinit_client" {
 }
 
 variable "allowlist" {
-  type        = list(number)
+  type        = list(string)
   description = "A list of IP ranges to allow access to the consul and nomad web UIs"
 }
