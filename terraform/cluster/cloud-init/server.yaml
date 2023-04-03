@@ -15,16 +15,21 @@ package_upgrade: true
 packages:
   - wget
   - unzip
+  - ca-certificates
+  - curl
+  - gnupg
 
 runcmd:
+  # Add approximately 500 keyrings by randomly curling a bunch of files and then echo | tee'ing into random places in my filesystem because apt is trash
+  - sudo mkdir -m 0755 -p /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   # Install consul and nomad
-  - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
-  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-  - apt update && apt install -y consul nomad
-  - systemctl enable consul
-  - systemctl start consul
-  - systemctl enable nomad
-  - systemctl start nomad
+  - wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+  - sudo apt update && sudo apt install -y consul nomad docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - sudo systemctl enable consul && sudo systemctl start consul
+  - sudo systemctl enable nomad && sudo systemctl start nomad
 
 write_files:
   - content: |
