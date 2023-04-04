@@ -4,14 +4,16 @@ variable "hetzner_token" {
   sensitive   = true
 }
 
-variable "cloudinit_server" {
+variable "server_size" {
   type        = string
-  description = "The path of the cloudinit yaml for the server instances"
+  description = "The Hetzner instance size for the server node"
+  default     = "cpx11"
 }
 
-variable "cloudinit_client" {
+variable "client_size" {
   type        = string
-  description = "The path of the cloudinit yaml for the client instances"
+  description = "The Hetzner instance size for the client node"
+  default     = "cpx11"
 }
 
 variable "allowlist" {

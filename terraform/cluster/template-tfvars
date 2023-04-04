@@ -1,4 +1,4 @@
-hetzner_token    = ""
-cloudinit_server = "server.yaml"
-cloudinit_client = "client.yaml"
-allowlist        = [""]
+hetzner_token = ""
+server_size   = "cpx11"
+client_size   = "cpx11"
+allowlist     = [""]

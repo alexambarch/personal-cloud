@@ -117,9 +117,9 @@ resource "hcloud_primary_ip" "server_ip" {
 resource "hcloud_server" "server" {
   name        = "server"
   image       = "ubuntu-22.04"
-  server_type = "cpx11"
+  server_type = var.server_size
   location    = "ash"
-  user_data   = file("${path.module}/cloud-init/${var.cloudinit_server}")
+  user_data   = file("${path.module}/cloud-init/server.yaml")
 
   public_net {
     ipv4_enabled = true
@@ -162,10 +162,10 @@ resource "hcloud_server" "client" {
 
   name               = "client-${count.index}"
   image              = "ubuntu-22.04"
-  server_type        = "cpx11"
+  server_type        = var.client_size
   location           = "ash"
   placement_group_id = hcloud_placement_group.placement-group.id
-  user_data          = file("${path.module}/cloud-init/${var.cloudinit_client}")
+  user_data          = file("${path.module}/cloud-init/client.yaml")
 
   public_net {
     ipv4_enabled = true
@@ -184,4 +184,12 @@ resource "hcloud_server" "client" {
   depends_on = [
     hcloud_network_subnet.subnet
   ]
+}
+
+output "server_ip" {
+  value = hcloud_primary_ip.server_ip.ip_address
+}
+
+output "client_ip" {
+  value = hcloud_primary_ip.client_ip.ip_address
 }
