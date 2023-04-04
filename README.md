@@ -1,6 +1,8 @@
 # personal-cloud
 A Terraform template for creating a tiny Consul + Nomad cluster on Hetzner (us-east/ash)
 
+This currently creates one server and two client agents for both Nomad and Consul.
+
 # Steps
 1. Get a Hetzner API token
 2. Fill out the template-tfvars
