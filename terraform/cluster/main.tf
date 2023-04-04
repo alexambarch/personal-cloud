@@ -40,6 +40,13 @@ resource "hcloud_network" "network" {
   labels   = local.labels
 }
 
+resource "hcloud_network_subnet" "subnet" {
+  network_id   = hcloud_network.network.id
+  type         = "cloud"
+  network_zone = "us-east"
+  ip_range     = "10.0.1.0/24"
+}
+
 resource "hcloud_firewall" "firewall" {
   name = "Cluster Firewall"
   rule {
@@ -86,20 +93,21 @@ resource "hcloud_firewall" "firewall" {
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = "0-65535"
+    port       = "any"
     source_ips = local.private_network
   }
 
   rule {
     direction  = "in"
     protocol   = "udp"
-    port       = "0-65535"
+    port       = "any"
     source_ips = local.private_network
   }
 }
 
 resource "hcloud_primary_ip" "server_ip" {
-  name          = "main"
+  name          = "server-ip"
+  datacenter    = "ash-dc1"
   type          = "ipv4"
   assignee_type = "server"
   auto_delete   = true
@@ -126,6 +134,10 @@ resource "hcloud_server" "server" {
 
   firewall_ids = [hcloud_firewall.firewall.id]
   labels       = local.labels
+
+  depends_on = [
+    hcloud_network_subnet.subnet
+  ]
 }
 
 resource "hcloud_placement_group" "placement-group" {
@@ -137,6 +149,7 @@ resource "hcloud_placement_group" "placement-group" {
 resource "hcloud_primary_ip" "client_ip" {
   count = 2
 
+  datacenter    = "ash-dc1"
   name          = "client-${count.index}-ip"
   type          = "ipv4"
   assignee_type = "server"
@@ -162,9 +175,13 @@ resource "hcloud_server" "client" {
 
   network {
     network_id = hcloud_network.network.id
-    ip         = "10.0.1.${count.index + 1}"
+    ip         = "10.0.1.${count.index + 2}"
   }
 
   firewall_ids = [hcloud_firewall.firewall.id]
   labels       = local.labels
+
+  depends_on = [
+    hcloud_network_subnet.subnet
+  ]
 }

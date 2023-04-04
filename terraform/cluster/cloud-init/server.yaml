@@ -21,44 +21,58 @@ packages:
 
 runcmd:
   # Add approximately 500 keyrings by randomly curling a bunch of files and then echo | tee'ing into random places in my filesystem because apt is trash
-  - sudo mkdir -m 0755 -p /etc/apt/keyrings
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  - echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - mkdir -m 0755 -p /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
   # Install consul and nomad
-  - wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
-  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-  - sudo apt update && sudo apt install -y consul nomad docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  - sudo systemctl enable consul && sudo systemctl start consul
-  - sudo systemctl enable nomad && sudo systemctl start nomad
+  - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+  # Do not overwrite the nomad and consul config files I've already put there
+  - apt-get update && apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y consul nomad docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - systemctl enable consul && systemctl start consul
+  - systemctl enable nomad && systemctl start nomad
 
 write_files:
   - content: |
-      {
-        "datacenter": "dc1",
-        "data_dir": "/opt/consul",
-        "log_level": "INFO",
-        "server": true,
-        "bootstrap_expect": 1,
-        "ui": true,
-        "client_addr": "{{ GetPrivateIP }}",
-        "bind_addr": "{{ GetPrivateIP }}",
-        "ports": {
-          "http": 8500,
-          "https": -1
-        },
-        "enable_script_checks": true
+      datacenter = "dc1"
+      data_dir   = "/opt/consul"
+
+      server           = true
+      bootstrap_expect = 1
+
+      ui_config {
+        enabled = true
       }
-    owner: cloud-admin
-    path: /etc/consul.d/server_config.json
+
+      client_addr = "0.0.0.0"
+      bind_addr   = "{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}"
+      ports {
+        http  = 8500
+        https = -1
+      }
+
+      connect {
+        enabled = true
+      }
+
+      enable_script_checks = true
+    path: /etc/consul.d/consul.hcl
     permissions: '0755'
+
+
+    # Nomad will try and advertise on the first private interface, which if Docker is installed will be the docker interface, so we need to explicitly set those addresses
   - content: |
-      {
-        "data_dir": "/opt/nomad/data",
-        "server": {
-          "enabled": true,
-          "bootstrap_expect": 1
-        }
+      data_dir = "/opt/nomad/data"
+
+      advertise {
+        http = "{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}"
+        rpc = "{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}"
+        serf = "{{ GetPrivateInterfaces | include \"network\" \"10.0.0.0/16\" | attr \"address\" }}"
       }
-    owner: cloud-admin
-    path: /etc/nomad.d/server_config.json
+
+      server {
+        enabled = true
+        bootstrap_expect = 1
+      }
+    path: /etc/nomad.d/nomad.hcl
     permissions: '0755'
