@@ -1,0 +1,4 @@
+hetzner_token    = ""
+cloudinit_server = ""
+cloudinit_client = ""
+allowlist        = [""]
