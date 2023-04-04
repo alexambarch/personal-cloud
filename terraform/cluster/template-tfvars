@@ -1,4 +1,4 @@
 hetzner_token    = ""
-cloudinit_server = ""
-cloudinit_client = ""
+cloudinit_server = "server.yaml"
+cloudinit_client = "client.yaml"
 allowlist        = [""]
