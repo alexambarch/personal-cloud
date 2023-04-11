@@ -26,7 +26,8 @@ locals {
   ]
 
   private_network = [
-    "10.0.0.0/16"
+    "10.0.0.0/16",
+    "100.64.0.0/10"
   ]
 
   labels = {
@@ -67,27 +68,6 @@ resource "hcloud_firewall" "firewall" {
     protocol   = "tcp"
     port       = "443"
     source_ips = local.everywhere
-  }
-
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "22"
-    source_ips = local.everywhere
-  }
-
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "8500"
-    source_ips = var.allowlist
-  }
-
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "4646"
-    source_ips = var.allowlist
   }
 
   rule {
@@ -184,12 +164,4 @@ resource "hcloud_server" "client" {
   depends_on = [
     hcloud_network_subnet.subnet
   ]
-}
-
-output "server_ip" {
-  value = hcloud_primary_ip.server_ip.ip_address
-}
-
-output "client_ip" {
-  value = hcloud_primary_ip.client_ip.ip_address
 }
