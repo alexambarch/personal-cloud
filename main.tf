@@ -10,7 +10,7 @@ terraform {
   required_providers {
     hcloud = {
       source  = "hetznercloud/hcloud"
-      version = "1.36.2"
+      version = "1.46.1"
     }
   }
 }
@@ -20,6 +20,8 @@ provider "hcloud" {
 }
 
 locals {
+  os_image = "ubuntu-22.04"
+
   everywhere = [
     "::/0",
     "0.0.0.0/0"
@@ -59,20 +61,6 @@ resource "hcloud_firewall" "firewall" {
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = "80"
-    source_ips = local.everywhere
-  }
-
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "443"
-    source_ips = local.everywhere
-  }
-
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
     port       = "any"
     source_ips = local.private_network
   }
@@ -82,6 +70,27 @@ resource "hcloud_firewall" "firewall" {
     protocol   = "udp"
     port       = "any"
     source_ips = local.private_network
+  }
+
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "any"
+    source_ips = var.allowlist
+  }
+
+  rule {
+    direction       = "out"
+    protocol        = "tcp"
+    port            = "any"
+    destination_ips = var.allowlist
+  }
+
+  rule {
+    direction       = "out"
+    protocol        = "udp"
+    port            = "any"
+    destination_ips = var.allowlist
   }
 }
 
@@ -96,7 +105,7 @@ resource "hcloud_primary_ip" "server_ip" {
 
 resource "hcloud_server" "server" {
   name        = "server"
-  image       = "ubuntu-22.04"
+  image       = local.os_image
   server_type = var.server_size
   location    = "ash"
   user_data   = file("${path.module}/cloud-init/server.yaml")
@@ -141,7 +150,7 @@ resource "hcloud_server" "client" {
   count = 2
 
   name               = "client-${count.index}"
-  image              = "ubuntu-22.04"
+  image              = local.os_image
   server_type        = var.client_size
   location           = "ash"
   placement_group_id = hcloud_placement_group.placement-group.id
